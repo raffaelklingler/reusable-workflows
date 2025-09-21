@@ -115,11 +115,6 @@ jobs:
             ```text
             ${{ steps.docker-metadata.outputs.tags }}
             ```
-
-            Labels added to images (TODO: remove probably):
-            ```text
-            ${{ steps.docker-metadata.outputs.labels }}
-            ```
           edit-mode: replace
 
         # output image tag for this GHA run, which can be used in dependent jobs
