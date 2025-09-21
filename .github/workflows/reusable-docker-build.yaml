@@ -1,4 +1,4 @@
-name: Docker Build and Push (rwf)
+name: Docker Build and Push
 
 on:
   workflow_call:
@@ -11,8 +11,8 @@ on:
         description: Dockerfile to use, relative to context path
         required: false
         type: string
-      image-names:
-        description: List of image names to push
+      images:
+        description: List of images to push
         required: false
         type: string
         default: |
@@ -41,20 +41,17 @@ on:
           type=raw,value=latest,enable={{is_default_branch}},priority=100
           type=raw,value=gha-${{ github.run_id }},enable=${{github.event_name == 'pull_request'}},priority=200
           type=ref,event=pr,priority=100
-
     outputs:
       image-tag:
-        description: single-use image tag for GHA runs (TODO)
-        value: ${{ jobs.build-image.outputs.image-tag }}
-
-permissions:
-  contents: read
-  packages: write # needed to push images to GHCR
-  pull-requests: write # needed to create and update PR comments
+        description: image tag which can be used in dependent jobs
+        value: ${{ jobs.docker-build-push.outputs.image-tag }}
 
 jobs:
-  build-image:
-    name: Docker Build and Push (rwfj)
+
+  docker-build-push:
+
+    name: Docker Build and Push
+
     runs-on: ubuntu-latest
 
     outputs:
@@ -80,15 +77,14 @@ jobs:
         id: docker-metadata
         uses: docker/metadata-action@v5.8.0
         with:
-          images: ${{ inputs.image-names }}
+          images: ${{ inputs.images }}
           tags: ${{ inputs.tag-rules }}
 
       - name: Docker Build and Push
         uses: docker/build-push-action@v6.18.0
         with:
           context: ${{ inputs.context }}
-          file: ${{ inputs.file }}
-          target: ${{ inputs.target }}
+          file: ${{ inputs.dockerfile }}
           platforms: linux/amd64
           builder: ${{ steps.docker-buildx.outputs.name }}
           # use github actions cache for faster builds
@@ -134,3 +130,8 @@ jobs:
         id: image-tag
         if: inputs.push
         run: echo "image-tag=${{ steps.docker-metadata.outputs.version }}" >> $GITHUB_OUTPUT
+
+permissions:
+  contents: read
+  packages: write # needed to push images to GHCR
+  pull-requests: write # needed to create and update PR comments
