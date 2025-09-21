@@ -49,8 +49,8 @@ on:
 
 permissions:
   contents: read
-  packages: write # needed to push docker image to ghcr.io
-  pull-requests: write # needed to create and update comments in PRs
+  packages: write # needed to push images to GHCR
+  pull-requests: write # needed to create and update PR comments
 
 jobs:
   build-image:
@@ -58,12 +58,11 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      # only outputs the unique gha- image tag that is unique to each GHA run
       image-tag: ${{ steps.image-tag.outputs.image-tag }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5.0.0
 
       - name: Set up Docker Buildx
         id: docker-buildx
@@ -100,8 +99,6 @@ jobs:
           tags: ${{ steps.docker-metadata.outputs.tags }}
           labels: ${{ steps.docker-metadata.outputs.labels }}
 
-        # If PR, put image tags in the PR comments
-        # from https://github.com/marketplace/actions/create-or-update-comment
       - name: Find existing PR comment with pushed image tags
         id: find-comment
         if: github.event_name == 'pull_request' && inputs.pr-comment && inputs.push
@@ -111,7 +108,6 @@ jobs:
           comment-author: github-actions[bot]
           body-includes: Image tags pushed
 
-        # If PR, put image tags in the PR comments
       - name: Create or update PR comment with pushed image tags
         if: github.event_name == 'pull_request' && inputs.pr-comment && inputs.push
         uses: peter-evans/create-or-update-comment@v4.0.0
