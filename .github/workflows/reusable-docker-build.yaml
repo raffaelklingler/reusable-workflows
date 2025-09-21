@@ -103,8 +103,8 @@ jobs:
         # from https://github.com/marketplace/actions/create-or-update-comment
       - name: Find existing PR comment with pushed image tags
         id: find-comment
+        if: github.event_name == 'pull_request' && inputs.pr-comment && inputs.push
         uses: peter-evans/find-comment@v3.1.0
-        if: github.event_name == 'pull_request' && inputs.pr-comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: github-actions[bot]
@@ -112,13 +112,13 @@ jobs:
 
         # If PR, put image tags in the PR comments
       - name: Create or update PR comment with pushed image tags
+        if: github.event_name == 'pull_request' && inputs.pr-comment && inputs.push
         uses: peter-evans/create-or-update-comment@v4.0.0
-        if: github.event_name == 'pull_request' && inputs.pr-comment
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            Image tags pushed:
+            Image tags pushed
             ```text
             ${{ steps.docker-metadata.outputs.tags }}
             ```
@@ -129,11 +129,11 @@ jobs:
             ```
           edit-mode: replace
 
-        # for dependent jobs, we need to output the unique tag for this GHA run
-        # based on the docker-metadata tag priority rules, the highest priority tag
-        # will be sent to this output
-        # this step output is sent to job output, which is sent to workflow output
-        # use this tag in another job with needs.<job-name>.outputs.image-tag
-      - name: Find the primary image tag we just pushed, and output it
+        # output image tag for this GHA run, which can be used in dependent jobs
+        # the highest priority tag of the docker-metadata tag rules is used
+        # this output is sent to the job output, which is sent to the workflow output
+        # use it in another job with "needs.<job-name>.outputs.image-tag"
+      - name: Output image tag
         id: image-tag
+        if: inputs.push
         run: echo "image-tag=${{ steps.docker-metadata.outputs.version }}" >> $GITHUB_OUTPUT
