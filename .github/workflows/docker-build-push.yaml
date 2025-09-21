@@ -101,7 +101,7 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            Image tags pushed
+            Image tags pushed:
             ```text
             ${{ steps.docker-metadata.outputs.tags }}
             ```
