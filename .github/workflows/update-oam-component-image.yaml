@@ -1,0 +1,30 @@
+name: Update OAM Component Image
+
+on:
+  workflow_call:
+    inputs:
+      oam-file:
+        description: OAM file to update
+        required: true
+        type: string
+      component:
+        description: Name of the component to update
+        required: true
+        type: string
+
+permissions:
+  contents: write # required for pushing commits
+
+jobs:
+  update-oam-component-image:
+    name: Update OAM Component Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+
+      - name: Update OAM Component Image
+        run: |
+          # TODO: add -i to really edit the file and then commit and push
+          yq '.spec.components[] | select(.name == "${{ inputs.component }}") | .properties.image = "${{ needs.build-push-image.outputs.image-tag }}"' ${{ inputs.oam-file }}
