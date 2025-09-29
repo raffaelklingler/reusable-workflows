@@ -32,10 +32,10 @@ on:
         description: Determine image tags based on a key-value pair list in CSV format
         required: false
         type: string
-        # Create image tag "stable-<date>-<commit-hash>" on push to default branch
-        # Create image tag "latest" on push to default branch
-        # Create image tag "gha-<gha-run-id>" on PR
-        # Create image tag "pr-<pr-id>" on PR
+        # create image tag "stable-<date>-<commit-hash>" on push to default branch
+        # create image tag "latest" on push to default branch
+        # create image tag "gha-<gha-run-id>" on PR
+        # create image tag "pr-<pr-id>" on PR
         default: |
           type=raw,value=stable-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}},priority=300
           type=raw,value=latest,enable={{is_default_branch}},priority=100
@@ -46,14 +46,15 @@ on:
         description: image tag which can be used in dependent jobs
         value: ${{ jobs.docker-build-push.outputs.image-tag }}
 
+permissions:
+  contents: read # required for checkout
+  packages: write # required for pushing images to GHCR
+  pull-requests: write # required for creating and updating PR comments
+
 jobs:
-
   docker-build-push:
-
     name: Docker Build and Push
-
     runs-on: ubuntu-latest
-
     outputs:
       image-tag: ${{ steps.image-tag.outputs.image-tag }}
 
@@ -114,8 +115,3 @@ jobs:
         id: image-tag
         if: inputs.push
         run: echo "image-tag=${{ steps.docker-metadata.outputs.version }}" >> $GITHUB_OUTPUT
-
-permissions:
-  contents: read
-  packages: write # needed to push images to GHCR
-  pull-requests: write # needed to create and update PR comments
