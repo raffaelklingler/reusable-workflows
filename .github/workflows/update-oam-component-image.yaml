@@ -31,4 +31,5 @@ jobs:
       - name: Update OAM Component Image
         run: |
           # TODO: add -i to really edit the file and then commit and push
-          yq '.spec.components[] | select(.name == "${{ inputs.component }}") | .properties.image = "${{ inputs.image }}"' ${{ inputs.oam-file }}
+
+          yq '.spec.components |= with(.[]; select(.name == "${{ inputs.component }}") .properties.image = "${{ inputs.image }}")' ${{ inputs.oam-file }}
