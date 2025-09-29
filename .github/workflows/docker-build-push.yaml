@@ -124,5 +124,5 @@ jobs:
         id: image-tag
         if: inputs.push
         run: |
-          echo "image=${{ steps.docker-metadata.outputs.json.tags[0] }}" >> $GITHUB_OUTPUT
+          echo "image=${{ fromJson(steps.docker-metadata.outputs.json).tags[0] }}" >> $GITHUB_OUTPUT
           echo "image-tag=${{ steps.docker-metadata.outputs.version }}" >> $GITHUB_OUTPUT
