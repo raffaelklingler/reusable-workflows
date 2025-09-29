@@ -33,6 +33,7 @@ jobs:
           yq -i '.spec.components |= with(.[]; select(.name == "${{ inputs.component }}") .properties.image = "${{ inputs.image }}")' ${{ inputs.oam-file }}
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull
           git add -A
           git commit -m "update image for component ${{ inputs.component }}"
           git push
