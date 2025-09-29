@@ -42,8 +42,11 @@ on:
           type=raw,value=gha-${{ github.run_id }},enable=${{github.event_name == 'pull_request'}},priority=200
           type=ref,event=pr,priority=100
     outputs:
+      image:
+        description: Resulting image which can be used in dependent jobs
+        value: ${{ jobs.docker-build-push.outputs.image }}
       image-tag:
-        description: image tag which can be used in dependent jobs
+        description: Resulting image tag which can be used in dependent jobs
         value: ${{ jobs.docker-build-push.outputs.image-tag }}
 
 permissions:
@@ -56,6 +59,7 @@ jobs:
     name: Docker Build and Push
     runs-on: ubuntu-latest
     outputs:
+      image: ${{ steps.image-tag.outputs.image }}
       image-tag: ${{ steps.image-tag.outputs.image-tag }}
 
     steps:
@@ -111,11 +115,14 @@ jobs:
         run: |
           echo "Docker Metadata outputs: ${{ toJson(steps.docker-metadata.outputs) }}"
 
-        # output image tag for this GHA run, which can be used in dependent jobs
-        # the highest priority tag of the docker-metadata tag rules is used
-        # this output is sent to the job output, which is sent to the workflow output
-        # use it in another job with "needs.<job-name>.outputs.image-tag"
+      # output image tag for this GHA run, which can be used in dependent jobs
+      # the highest priority tag of the docker-metadata tag rules is used
+      # this output is sent to the job output, which is sent to the workflow output
+      # use it in another job with "needs.<job-name>.outputs.image-tag"
+      # TODO update desc and stuff
       - name: Output image tag
         id: image-tag
         if: inputs.push
-        run: echo "image-tag=${{ steps.docker-metadata.outputs.version }}" >> $GITHUB_OUTPUT
+        run: |
+          echo "image=${{ steps.docker-metadata.outputs.json.tags[0] }}" >> $GITHUB_OUTPUT
+          echo "image-tag=${{ steps.docker-metadata.outputs.version }}" >> $GITHUB_OUTPUT
