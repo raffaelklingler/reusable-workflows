@@ -3,10 +3,6 @@ name: Update OAM Component Image
 on:
   workflow_call:
     inputs:
-      oam-file:
-        description: OAM file to update
-        required: true
-        type: string
       component:
         description: Name of the component to update
         required: true
@@ -14,6 +10,10 @@ on:
       image:
         description: New image to set
         required: false
+        type: string
+      oam-file:
+        description: OAM file to update
+        required: true
         type: string
 
 permissions:
