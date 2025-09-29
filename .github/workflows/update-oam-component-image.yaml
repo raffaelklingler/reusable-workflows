@@ -11,6 +11,10 @@ on:
         description: Name of the component to update
         required: true
         type: string
+      image:
+        description: New image to set
+        required: false
+        type: string
 
 permissions:
   contents: write # required for pushing commits
@@ -27,4 +31,4 @@ jobs:
       - name: Update OAM Component Image
         run: |
           # TODO: add -i to really edit the file and then commit and push
-          yq '.spec.components[] | select(.name == "${{ inputs.component }}") | .properties.image = "${{ needs.build-push-image.outputs.image-tag }}"' ${{ inputs.oam-file }}
+          yq '.spec.components[] | select(.name == "${{ inputs.component }}") | .properties.image = "${{ inputs.image }}"' ${{ inputs.oam-file }}
