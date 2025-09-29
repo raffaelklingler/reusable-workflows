@@ -107,6 +107,10 @@ jobs:
             ${{ steps.docker-metadata.outputs.tags }}
             ```
 
+      - name: Debug Output
+        run: |
+          echo "Docker Metadata outputs: ${{ toJson(steps.docker-metadata.outputs) }}"
+
         # output image tag for this GHA run, which can be used in dependent jobs
         # the highest priority tag of the docker-metadata tag rules is used
         # this output is sent to the job output, which is sent to the workflow output
